@@ -1,0 +1,44 @@
+﻿@inject HttpClient Http
+
+<EditForm Model="Model" OnValidSubmit="Submit" FormName="AddRecord">
+    <AntiforgeryToken />
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div>
+        <label>
+            Full Name
+            <TextInput @bind-Value="Model.fullName" />
+        </label>
+        <label>
+            Phone Number
+            <TextInput @bind-Value="Model.phoneNumber" />
+
+        </label>
+
+        <Button Color="ButtonColor.Success" Type="ButtonType.Submit">Submit</Button>
+    </div>
+    <div>
+
+    </div>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private BookRecord? Model { get; set; }
+
+    [Parameter] public EventCallback OnSubmit { get; set; }
+
+    protected override void OnInitialized() => Model ??= new();
+
+    private async void Submit() {
+        await AddRecord();
+        await OnSubmit.InvokeAsync();
+        Model = new();
+        this.StateHasChanged();
+    }
+
+    private async Task AddRecord() {
+        await Http.PostAsJsonAsync<BookRecord>("AddressBook", Model);
+    }
+
+}

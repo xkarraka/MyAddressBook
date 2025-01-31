@@ -1,0 +1,61 @@
+﻿@inject HttpClient Http
+
+<ConfirmDialog @ref="dialog" />
+<Grid @ref="grid" TItem="BookRecord" 
+Data="model"
+Class="table table-hover table-bordered table-striped"
+Responsive="true"
+>
+	<GridColumns>
+		<GridColumn TItem="BookRecord" HeaderText="Full Name" PropertyName="FullName">
+			@context.fullName
+		</GridColumn>
+		<GridColumn TItem="BookRecord" HeaderText="Phone Number" PropertyName="PhoneNumber" >
+			@context.phoneNumber
+		</GridColumn>
+		<GridColumn TItem="BookRecord">
+			<Button Color="ButtonColor.Danger" @onclick="(() => deleteEntry(context.id.Value))"> Delete</Button>
+		</GridColumn>
+	</GridColumns>
+</Grid>
+
+@code {
+	private ConfirmDialog dialog = default!;
+	private Grid<BookRecord> grid = default!;
+	private BookRecord[] model = default!;
+
+	protected override async Task OnInitializedAsync() {
+		model = await GetBookRecords();
+	}
+
+	protected async Task deleteEntry(int id)
+	{
+		var options = new ConfirmDialogOptions { IsVerticallyCentered = true };
+		var confirmation = await dialog.ShowAsync(
+			title: "Delete Record",
+			message1: "Do you want to proceed? this operation cannot be undone",
+			confirmDialogOptions: options);
+
+		if (confirmation)
+		{
+			await DeleteRecord(id);
+			await RefreshData();
+		}
+	}
+
+	public async Task RefreshData()
+	{
+		model = await GetBookRecords();
+		await grid.RefreshDataAsync();
+		this.StateHasChanged();
+	}
+
+	private async Task DeleteRecord(int id)
+	{
+		await Http.DeleteAsync($"AddressBook/{id}");
+	}
+
+	private async Task<BookRecord[]> GetBookRecords() {
+		return await Http.GetFromJsonAsync<BookRecord[]>("AddressBook");
+	}
+}

@@ -1,0 +1,19 @@
+﻿@page "/"
+@using MyAddressBook.Components.AddressBookList
+@using MyAddressBook.Components.AddBookRecord
+
+<PageTitle>My Address Boook</PageTitle>
+
+<h1>Hello, Welcome to your Address Book</h1>
+
+<AddBookRecord OnSubmit="OnRecordAdded" />
+<AddressBookList @ref="recordList" />
+
+@code {
+	AddressBookList recordList = default!;
+
+	private async void OnRecordAdded()
+	{
+		await recordList.RefreshData();
+	}
+}
